@@ -26,7 +26,7 @@ s3.upload_file("start.txt", bucket_name, key)
 
 def log(string):
     ct = datetime.datetime.now()
-    string += f" {ct}"
+    string += f" {ct}\n"
     # Download the file from S3 to a local temp file
     local_temp_file = 'temp_file.txt'  # Replace with your local path
     s3.download_file(bucket_name, key, local_temp_file)
@@ -53,7 +53,7 @@ def create_member(member: schemas.MemberCreate, db: Session = Depends(get_db)):
 
 @app.get("/")
 def hello_world():
-    log("Hello World\n")
+    log("Hello World")
     return "Hello World"
 
 @app.get("/quotes/", response_model=list[schemas.Member])
