@@ -2,10 +2,48 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from . import models, schemas, crud
 from .database import SessionLocal, engine
+import boto3
+import os
+import datetime
 
 models.Base.metadata.create_all(bind=engine)
 
+acesso_aws = os.getenv("AWS_ACCESS_KEY_ID")
+
+senha_aws =os.getenv("AWS_SECRET_ACCESS_KEY")
+
+s3 = boto3.client(
+    "s3",
+    aws_access_key_id=acesso_aws,
+    aws_secret_access_key=senha_aws,
+)
+
+
+bucket_name = "pedropmc-bucket"
+
+instance_id = os.getenv("INSTANCE")
+
+key = f"logs/log_{instance_id}.txt"
+
 app = FastAPI()
+
+# Upload the modified file back to S3
+s3.upload_file("start.txt", bucket_name, key)
+
+def log(string):
+    ct = datetime.datetime.now()
+    string += f" {ct}"
+    # Download the file from S3 to a local temp file
+    local_temp_file = 'temp_file.txt'  # Replace with your local path
+    s3.download_file(bucket_name, key, local_temp_file)
+    # Append the string to the local file
+    with open(local_temp_file, 'a') as f:
+        f.write(string)
+    # Upload the modified file back to S3
+    s3.upload_file(local_temp_file, bucket_name, key)
+    
+
+
 
 # Dependency to get the database session
 def get_db():
@@ -21,6 +59,8 @@ def create_member(member: schemas.MemberCreate, db: Session = Depends(get_db)):
 
 @app.get("/")
 def hello_world():
+
+    log("Hello World\n")
     return "Hello World"
 
 @app.get("/quotes/", response_model=list[schemas.Member])
