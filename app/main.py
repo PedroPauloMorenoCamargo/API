@@ -8,16 +8,10 @@ import datetime
 
 models.Base.metadata.create_all(bind=engine)
 
-acesso_aws = os.getenv("AWS_ACCESS_KEY_ID")
 
-senha_aws =os.getenv("AWS_SECRET_ACCESS_KEY")
+session = boto3.Session()
 
-s3 = boto3.client(
-    "s3",
-    aws_access_key_id=acesso_aws,
-    aws_secret_access_key=senha_aws,
-)
-
+s3 = session.client('s3')
 
 bucket_name = "pedropmc-bucket"
 
@@ -59,7 +53,6 @@ def create_member(member: schemas.MemberCreate, db: Session = Depends(get_db)):
 
 @app.get("/")
 def hello_world():
-
     log("Hello World\n")
     return "Hello World"
 
