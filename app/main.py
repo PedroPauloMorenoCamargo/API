@@ -49,11 +49,12 @@ def get_db():
 
 @app.post("/quotes/", response_model=schemas.Member)
 def create_member(member: schemas.MemberCreate, db: Session = Depends(get_db)):
+    log("POST /quotes/")
     return crud.create_member(db=db, member=member)
 
 @app.get("/")
 def hello_world():
-    log("Hello World")
+    log("GET /")
     return "Hello World"
 
 @app.get("/quotes/", response_model=list[schemas.Member])
@@ -65,19 +66,25 @@ def read_members(db: Session = Depends(get_db)):
 def read_member(member_id: int, db: Session = Depends(get_db)):
     db_member = crud.get_member(db, member_id=member_id)
     if db_member is None:
+        log(f"GET /quotes/{member_id} 404")
         raise HTTPException(status_code=404, detail="Member not found")
+    log(f"GET /quotes/{member_id}")
     return db_member
 
 @app.put("/quotes/{member_id}", response_model=schemas.Member)
 def update_member(member_id: int, member: schemas.MemberUpdate, db: Session = Depends(get_db)):
     db_member = crud.get_member(db, member_id=member_id)
     if db_member is None:
+        log(f"PUT /quotes/{member_id} 404")
         raise HTTPException(status_code=404, detail="Member not found")
+    log(f"PUT /quotes/{member_id}")
     return crud.update_member(db=db, member=member, member_id=member_id)
 
 @app.delete("/quotes/{member_id}", response_model=schemas.DeletedResponse)
 def delete_member(member_id: int, db: Session = Depends(get_db)):
     deleted = crud.delete_member(db=db, member_id=member_id)
     if not deleted:
+        log(f"DEL /quotes/{member_id} 404")
         raise HTTPException(status_code=404, detail="Member not found")
+    log(f"DEL /quotes/{member_id} 404")
     return {"message": "Member deleted successfully", "deleted_member_id": member_id}
