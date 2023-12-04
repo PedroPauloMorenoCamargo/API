@@ -21,24 +21,30 @@ key = f"logs/log_{instance_id}.txt"
 
 app = FastAPI()
 
-# Upload the modified file back to S3
-s3.upload_file("start.txt", bucket_name, key)
+try:
+    # Upload the modified file back to S3
+    s3.upload_file("start.txt", bucket_name, key)
+except:
+    pass
 
 def log(string):
     ct = datetime.datetime.now()
     string += f" {ct}\n"
     # Download the file from S3 to a local temp file
     try:
-        local_temp_file = 'temp_file.txt'  # Replace with your local path
-        s3.download_file(bucket_name, key, local_temp_file)
-        # Append the string to the local file
-        with open(local_temp_file, 'a') as f:
-            f.write(string)
-        # Upload the modified file back to S3
-        s3.upload_file(local_temp_file, bucket_name, key)
+        try:
+            local_temp_file = 'temp_file.txt'  # Replace with your local path
+            s3.download_file(bucket_name, key, local_temp_file)
+            # Append the string to the local file
+            with open(local_temp_file, 'a') as f:
+                f.write(string)
+            # Upload the modified file back to S3
+            s3.upload_file(local_temp_file, bucket_name, key)
+        except:
+            # Upload the modified file back to S3
+            s3.upload_file("start.txt", bucket_name, key)
     except:
-        # Upload the modified file back to S3
-        s3.upload_file("start.txt", bucket_name, key)
+        return
 
 
 
