@@ -32,19 +32,19 @@ def log(string):
     string += f" {ct}\n"
     # Download the file from S3 to a local temp file
     try:
-        try:
-            local_temp_file = 'temp_file.txt'  # Replace with your local path
-            s3.download_file(bucket_name, key, local_temp_file)
-            # Append the string to the local file
-            with open(local_temp_file, 'a') as f:
-                f.write(string)
-            # Upload the modified file back to S3
-            s3.upload_file(local_temp_file, bucket_name, key)
-        except:
-            # Upload the modified file back to S3
-            s3.upload_file("start.txt", bucket_name, key)
+        local_temp_file = 'temp_file.txt'  # Replace with your local path
+        s3.download_file(bucket_name, key, local_temp_file)
+        # Append the string to the local file
+        with open(local_temp_file, 'a') as f:
+            f.write(string)
+        # Upload the modified file back to S3
+        s3.upload_file(local_temp_file, bucket_name, key)
     except:
-        return
+        # Upload the modified file back to S3
+        try:    
+            s3.upload_file("start.txt", bucket_name, key)
+        except:
+            return
 
 
 
